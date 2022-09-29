@@ -51,3 +51,15 @@ plot!(discretize(KernelDensity(y))...,label = "y")
 my_test = sameDistributionTest(x,y)
 
 my_test.plot
+
+
+
+x = randn(500) .+ 2.7 
+y = randn(500) .+ 3 
+
+plot(discretize(KernelDensity(x))...,legend = :topright,label = "x")
+plot!(discretize(KernelDensity(y))...,label = "y")
+
+my_test = sameDistributionTest(x,y)
+
+my_test.plot

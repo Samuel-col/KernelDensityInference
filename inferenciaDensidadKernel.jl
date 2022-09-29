@@ -149,7 +149,7 @@ module KernelTests
         plot::Union{Plots.Plot,Missing}
 
         function sameDistributionTest(x::Vector{T},y::Vector{T}; 
-                                        NIter::Int = 200,plt::Bool = true) where T<: Real
+                                        NIter::Int = 500,plt::Bool = true) where T<: Real
             
             nx = length(x)
             ny = length(y)
