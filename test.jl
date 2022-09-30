@@ -54,6 +54,7 @@ y = randn(80) .+ 3
 
 my_test = sameDistributionTest(x,y)
 
+typeof(my_test)
 plot(my_test)
 
 ## Independencia de poblaciones ----
@@ -62,4 +63,5 @@ y = exp.(2 .+ rand(30))
 
 my_test = independencyTest(x,y)
 
+typeof(my_test)
 plot(my_test)
