@@ -89,8 +89,7 @@ my_test.plot
 # Kernel bivariado
 
 x = rand(100)
-y = -(x .- 1).*(x .+ 1) .+ 0.2 .*randn(100)
-
+y = -(x .- 1).*(x .+ 1) .+ 0.1 .*randn(100)
 
 bkd = BivariateKernelDensity(x,y)
 
@@ -106,4 +105,8 @@ typeof(my_pts)
 typeof(my_dty)
 
 independencyTest(x,y)
+independencyTest(x,y).plot
 
+
+plot(KernelDensity(x))
+plot!(KernelDensity(y))

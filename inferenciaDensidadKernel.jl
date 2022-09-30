@@ -3,13 +3,13 @@ module KernelTests
 
     # Funciones a exportar
     export KernelDensity, BivariateKernelDensity
-    export density, discretize, plot
+    export density, discretize, plot, plot!
     export sameDistributionTest, independencyTest
 
     # Paquetes
     using Statistics, StatsBase, LinearAlgebra, Plots
     import Base: display
-    import Plots: plot, heatmap
+    import Plots: plot, plot!, heatmap, heatmap!
     import QuadGK: quadgk
 
     ## Densidad normal
@@ -98,7 +98,6 @@ module KernelTests
         b = KD.domain[2]
         Δ = (b-a)/nGrid
         x = collect(a:Δ:b)
-        # y = [density(xi,KD) for xi in x]
         y = density(x,KD)
         return x,y
     end
@@ -268,30 +267,19 @@ module KernelTests
 
     ## Discretizar la función de densidad kernel bivariado evaluándola en una grilla
     function discretize(BKD::BivariateKernelDensity;nGrid::Int = 400)
-        # a_x,b_x = BKD.domain[1]
-        # a_y,b_y = BKD.domain[2]
-        # Δ_x = (b_x-a_x)/nGrid
-        # Δ_y = (b_y-a_y)/nGrid
         x_grid = range(BKD.domain[1]...,length = nGrid)
         y_grid = range(BKD.domain[2]...,length = nGrid)
-        pts = [(x,y) for x in x_grid, y in y_grid] |> vec
+        pts = [(x,y) for y in y_grid, x in x_grid] |> vec
         d_pts = density(pts,BKD)
         return pts,d_pts
     end
 
     ## Método para graficar BivariateKernelDensity
     function plot(BKD::BivariateKernelDensity;nGrid::Int  = 160,args...)::Plots.Plot
-        # a_x,b_x = BKD.domain[1]
-        # a_y,b_y = BKD.domain[2]
 
         x_grid = range(BKD.domain[1]...,length = nGrid)
         y_grid = range(BKD.domain[2]...,length = nGrid)
-        # Δ_x = (b_x-a_x)/nGrid
-        # Δ_y = (b_y-a_y)/nGrid
-        # x_grid = a_x:Δ_x:b_x
-        # y_grid = a_y:Δ_y:b_y
-        # k = min(length())
-        dty = [density((x,y),BKD) for x in x_grid, y in y_grid]
+        dty = [density((x,y),BKD) for y in y_grid, x in x_grid]
         
         heatmap(x_grid,y_grid,dty,
             color = :coolwarm;
@@ -302,7 +290,7 @@ module KernelTests
     function plot!(BKD::BivariateKernelDensity;nGrid::Int  = 160,args...)::Plots.Plot
         x_grid = range(BKD.domain[1]...,length = nGrid)
         y_grid = range(BKD.domain[2]...,length = nGrid)
-        dty = [density((x,y),BKD) for x in x_grid, y in y_grid]
+        dty = [density((x,y),BKD) for y in y_grid, x in x_grid]
         
         heatmap!(x_grid,y_grid,dty,
             color = :coolwarm;
@@ -318,8 +306,6 @@ module KernelTests
         kd_xy = BivariateKernelDensity(x,y)
 
         Tc = (density(kd_xy.pts,kd_xy) ./ (density(x,kd_x) .* density(y,kd_y)) ) .|> log |> mean
-        #Tc = [density(p[1],kd_x),density(p[2],kd_y)/density(p,kd_xy) 
-        #            for p in kd_xy.pts] .|> log |> mean
 
         return Tc
 
