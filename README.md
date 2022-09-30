@@ -4,6 +4,8 @@
 
 This modulo implements three statistical tests based on the kernel density estimator. It creates univariate and bivariate kernel densities estimators and methods for plotting them using the `plot` function from `Plots` package.
 
+![](bivKernel.png)
+
 ---
 
 ## Tests
@@ -28,7 +30,7 @@ whith $f_x(\cdot)$ and $f_y(\cdot)$ the KDE for each sample `x` and `y`, respect
 
 **Test statistic**:
 
-$$T_c = \frac{1}{n}\sum_{i=1}^n log\right(\frac{f_{xy}(x_i,y_i)}{f_x(x_i)f_y(y_i)}\left)$$
+$$T_c = \frac{1}{n}\sum_{i=1}^n log\left(\frac{f_{xy}(x_i,y_i)}{f_x(x_i)f_y(y_i)}\right)$$
 
 where $f_{xy}(\cdot,\cdot)$ is the joint bivariate kernel density estimation for `x`and `y`.
 
@@ -45,4 +47,4 @@ I'd like to implement the following tests:
 
 ## Documentation
 
-Currently there is not available documentation but I hope that the examples in the test file `inferenciaDensidadKernel_test.jl` can help you to understand how to load and use the module contained in `inferenciaDensidadKernel.jl`.
+Currently there is not available documentation but I hope that the examples in the test file `inferenciaDensidadKernel_test.jl` can help you to understand how to load and use the module contained in `inferenciaDensidadKernel.jl`. Don't forget to change the working directory!
