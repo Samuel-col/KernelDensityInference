@@ -2,12 +2,14 @@
 module KernelTests
 
     # Funciones a exportar
-    export KernelDensity, density, discretize, plot, sameDistributionTest
+    export KernelDensity, BivariateKernelDensity
+    export density, discretize, plot
+    export sameDistributionTest, independencyTest
 
     # Paquetes
     using Statistics, StatsBase, LinearAlgebra, Plots
     import Base: display
-    import Plots: plot
+    import Plots: plot, heatmap
     import QuadGK: quadgk
 
     ## Densidad normal
@@ -41,7 +43,7 @@ module KernelTests
         n::Int
         h::Float64
         domain::Tuple{T,T} where T<:Real
-        xi::Vector{T} where T<:Real
+        pts::Vector{T} where T<:Real
 
         ## Métido constructor
         function KernelDensity(x::Vector{T};h::Union{T,Missing} = missing) where T<:Real
@@ -61,7 +63,7 @@ module KernelTests
     ## Evaluar la densidad kernel en un punto
     function density(x::T,KD::KernelDensity) where T<:Real
 
-        return mean([K(x-xi,h = KD.h) for xi in KD.xi])
+        return mean([K(x-p,h = KD.h) for p in KD.pts])
     end
 
     ## Evaluar la densidad kernel en varios puntos
@@ -96,7 +98,8 @@ module KernelTests
         b = KD.domain[2]
         Δ = (b-a)/nGrid
         x = collect(a:Δ:b)
-        y = [density(xi,KD) for xi in x]
+        # y = [density(xi,KD) for xi in x]
+        y = density(x,KD)
         return x,y
     end
 
@@ -183,6 +186,7 @@ module KernelTests
 
     end
 
+    ## Descripción de sameDistributionTest
     function display(test::sameDistributionTest)
         result = """
         Equal distributions test:
@@ -198,5 +202,193 @@ module KernelTests
         """
         println(result)
     end
+
+    struct BivariateKernelDensity
+        n::Int
+        h::Tuple{Float64,Float64}
+        domain::Tuple{Tuple{T,T},Tuple{T,T}} where T<:Real
+        # xi::Tuple{Vector{T},Vector{T}} where T<:Real
+        pts::Vector{Tuple{T,T}} where T<:Real
+
+        ## Métido constructor
+        function BivariateKernelDensity(x::Vector{T},y::Vector{T};
+                        hx::Union{T,Missing} = missing,
+                        hy::Union{T,Missing} = missing) where T<:Real
+            
+            if length(x) != length(y)
+                stop("x and y must have the same length.")
+            end
+
+            n = length(x)
+            
+            if ismissing(hx)
+                hx = optimum_bandwidth(x)
+            end
+            if ismissing(hy)
+                hy = optimum_bandwidth(y)
+            end
+            
+            extr = extrema(x)
+            range = extr[2] - extr[1]
+            domainx = extr .+ (-range*0.3,range*0.3)
+
+            extr = extrema(y)
+            range = extr[2] - extr[1]
+            domainy = extr .+ (-range*0.3,range*0.3)
+
+            pts = [(x[i],y[i]) for i in 1:n]
+
+            new(n,(hx,hy),(domainx,domainy),pts)
+        end
+    end
+
+    ## Evaluar la densidad kernel bivariado en un punto
+    function density(x::Tuple{T,T},BKD::BivariateKernelDensity) where T<:Real
+
+        return mean([K(x[1]-p[1],h = BKD.h[1])*K(x[2]-p[2],h = BKD.h[2]) for p in BKD.pts])
+    end
+
+    ## Evaluar la densidad kernel bivariado en varios puntos
+    function density(x::Vector{Tuple{T,T}},BKD::BivariateKernelDensity) where T<:Real
+        
+        return [density(xi,BKD) for xi in x]
+    end
+
+    ## Descripción de BivariateKernelDensity
+    function display(BKD::BivariateKernelDensity)
+        report = """
+            KernelDensity:
+                n = $(BKD.n)
+                Bandwidths (hx,hy) = $(BKD.h)
+                domainx = $(BKD.domain[1])
+                domainy = $(BKD.domain[2])
+        """
+        println(report)
+    end
+
+    ## Discretizar la función de densidad kernel bivariado evaluándola en una grilla
+    function discretize(BKD::BivariateKernelDensity;nGrid::Int = 400)
+        # a_x,b_x = BKD.domain[1]
+        # a_y,b_y = BKD.domain[2]
+        # Δ_x = (b_x-a_x)/nGrid
+        # Δ_y = (b_y-a_y)/nGrid
+        x_grid = range(BKD.domain[1]...,length = nGrid)
+        y_grid = range(BKD.domain[2]...,length = nGrid)
+        pts = [(x,y) for x in x_grid, y in y_grid] |> vec
+        d_pts = density(pts,BKD)
+        return pts,d_pts
+    end
+
+    ## Método para graficar BivariateKernelDensity
+    function plot(BKD::BivariateKernelDensity;nGrid::Int  = 160,args...)::Plots.Plot
+        # a_x,b_x = BKD.domain[1]
+        # a_y,b_y = BKD.domain[2]
+
+        x_grid = range(BKD.domain[1]...,length = nGrid)
+        y_grid = range(BKD.domain[2]...,length = nGrid)
+        # Δ_x = (b_x-a_x)/nGrid
+        # Δ_y = (b_y-a_y)/nGrid
+        # x_grid = a_x:Δ_x:b_x
+        # y_grid = a_y:Δ_y:b_y
+        # k = min(length())
+        dty = [density((x,y),BKD) for x in x_grid, y in y_grid]
+        
+        heatmap(x_grid,y_grid,dty,
+            color = :coolwarm;
+            args...
+        )
+    end
+
+    function plot!(BKD::BivariateKernelDensity;nGrid::Int  = 160,args...)::Plots.Plot
+        x_grid = range(BKD.domain[1]...,length = nGrid)
+        y_grid = range(BKD.domain[2]...,length = nGrid)
+        dty = [density((x,y),BKD) for x in x_grid, y in y_grid]
+        
+        heatmap!(x_grid,y_grid,dty,
+            color = :coolwarm;
+            args...
+        )
+    end
+
+
+    ## Estadística de Independencia de variables
+    function independencyTest_statistic(x::Vector{T},y::Vector{T}) where T<:Real
+        kd_x = KernelDensity(x)
+        kd_y = KernelDensity(y)
+        kd_xy = BivariateKernelDensity(x,y)
+
+        Tc = (density(kd_xy.pts,kd_xy) ./ (density(x,kd_x) .* density(y,kd_y)) ) .|> log |> mean
+        #Tc = [density(p[1],kd_x),density(p[2],kd_y)/density(p,kd_xy) 
+        #            for p in kd_xy.pts] .|> log |> mean
+
+        return Tc
+
+    end
+
+    ## Independencia de variables
+    struct independencyTest
+        n::Int
+        Tc::Float64
+        pValue::Float64
+        NIter::Int
+        plot::Union{Plots.Plot,Missing}
+
+        function independencyTest(x::Vector{T},y::Vector{T};
+                                    NIter::Int = 500, plt::Bool = true) where T<:Real
+            nx = length(x)
+            ny = length(y)
+
+            if nx != ny
+                stop("x and y must have the same length.")
+            end
+
+            Tc = independencyTest_statistic(x,y)
+            
+
+            T_distribution = []
+            for i in 1:NIter
+                y_star = shuffle_sample(y)
+                Ti = independencyTest_statistic(x,y_star)
+                push!(T_distribution,Ti)
+            end
+
+            pValue = mean(Tc .< T_distribution)
+
+            if plt
+                T_distribution = convert(Vector{Float64},T_distribution)
+                kd_T = KernelDensity(T_distribution)
+                plot = Plots.plot(kd_T,
+                            title = "T-statistic distribution",
+                            xlabel = "t",
+                            ylabel = "Density",
+                            legend = false
+                            )
+                plot = Plots.vline!(plot,[Tc],linestyle = :dash)
+            else
+                plot = missing
+            end
+
+            new(nx,Tc,pValue,NIter,plot)
+        end
+
+    end
+
+    ## Descripción de independencyTest
+    function display(test::independencyTest)
+        result = """
+        Independency test:
+            Sample length: 
+                n = $(test.n)
+            Null Hypothesys:
+                Variables x and y are independent.
+            Test Statistic:
+                Tc = $(test.Tc)
+                p-value = $(test.pValue)
+                    (aproximated using $(test.NIter) iterations).
+        """
+        println(result)
+    end
+
+
 
 end

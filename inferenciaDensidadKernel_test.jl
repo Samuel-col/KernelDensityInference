@@ -10,9 +10,9 @@ x = randn(1000) .* 5 .+ 3 # Muestra aleatoria N = 1000, μ = 3, σ = 5
 
 kd = KernelDensity(x)
 
-density(0,kd)
+KernelTests.density(0,kd)
 
-density([-10,0,10],kd)
+KernelTests.density([-10,0,10],kd)
 
 ## Graficar
 
@@ -63,3 +63,47 @@ plot!(discretize(KernelDensity(y))...,label = "y")
 my_test = sameDistributionTest(x,y)
 
 my_test.plot
+
+
+# Prueba de independencia de variables
+
+x = randn(30)
+y = exp.(2 .+ rand(30))
+
+my_test = independencyTest(x,y)
+
+my_test.plot
+
+
+
+x = randn(30)
+y = exp.(2 .+ rand(30)) .+  4x
+
+my_test = independencyTest(x,y)
+
+my_test.plot
+
+
+
+
+# Kernel bivariado
+
+x = rand(100)
+y = -(x .- 1).*(x .+ 1) .+ 0.2 .*randn(100)
+
+
+bkd = BivariateKernelDensity(x,y)
+
+plot(bkd,
+    title = "Bivariate Kernel Density",
+    xlabel = "x",
+    ylabel = "y"
+)
+
+my_pts,my_dty = discretize(bkd)
+
+typeof(my_pts)
+typeof(my_dty)
+
+independencyTest(x,y)
+
