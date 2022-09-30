@@ -20,13 +20,13 @@ Currently there are only two tests but I'll add more later (open to volunteers):
 
 $$T_c = \int_D \left[f_x(u) - f_y(u)\right]^2 du$$
 
-whith $f_x(\cdot)$ and $f_y(\cdot)$ the KDE for each sample `x` and `y`, respectively.
+where $f_x(\cdot)$ and $f_y(\cdot)$ the KDE for each sample `x` and `y`, respectively.
 
-**P-Value**: We aproximate the distribution of `T` statistic by mixing samples `x` and `y` `NIter` times and calculating the respective statistic each time.
+**P-Value**: We aproximate the distribution of `T` statistic by resampling from (`x` $\cup$ `y`) `NIter` times and calculating the respective statistic each time.
 
 ### Independency test
 
-**Null hypothesys**: Samples 1 and samples 2 are realizations of independent random variables.
+**Null hypothesys**: Sample 1 and sample 2 that came from two independent random variables.
 
 **Test statistic**:
 
