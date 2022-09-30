@@ -41,10 +41,10 @@ where $f_{xy}(\cdot,\cdot)$ is the joint bivariate kernel density estimation for
 I'd like to implement the following tests:
 
 * Visual normality test using confidence bands.
-* Symmetry test i.e. $f(x - \mu) = f(\mu - x)$.
+* Symmetry test i.e. $f(x - \mu) = f(- x - \mu)$.
 
 ---
 
 ## Documentation
 
-Currently there is not available documentation but I hope that the examples in the test file `inferenciaDensidadKernel_test.jl` can help you to understand how to load and use the module contained in `inferenciaDensidadKernel.jl`. Don't forget to change the working directory!
+Currently there is not available documentation but I hope that the examples in `example.ipynb` and the test file can help you to understand how to load and use the module contained in `src` folder. Don't forget to change the working directory!
