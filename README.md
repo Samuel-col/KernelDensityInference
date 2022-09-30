@@ -2,7 +2,7 @@
 
 ## Description
 
-This modulo implements three statistical tests based on the kernel density estimator. It creates univariate and bivariate kernel densities estimators and methods for plotting them using the `plot` function from `Plots` package.
+This module implements three statistical tests based on the kernel density estimator. It creates univariate and bivariate kernel density estimators and methods for plotting them using the `plot` function from `Plots` package.
 
 ![](bivKernel.png)
 
