@@ -54,7 +54,8 @@ struct sameDistributionTest <: AbstractHypothesysTest
                         title = "T-statistic distribution",
                         xlabel = "t",
                         ylabel = "Density",
-                        legend = false
+                        legend = false,
+                        xlim = (0,max(Tc,maximum(T_distribution))*1.2)
                         )
             plot = Plots.vline!(plot,[Tc],linestyle = :dash)
         else
@@ -135,7 +136,8 @@ struct independencyTest <: AbstractHypothesysTest
                         title = "T-statistic distribution",
                         xlabel = "t",
                         ylabel = "Density",
-                        legend = false
+                        legend = false,
+                        xlim = (0,max(Tc,maximum(T_distribution))*1.2)
                         )
             plot = Plots.vline!(plot,[Tc],linestyle = :dash)
         else
