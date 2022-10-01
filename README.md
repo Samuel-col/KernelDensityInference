@@ -47,4 +47,4 @@ I'd like to implement the following tests:
 
 ## Documentation
 
-Currently there is not available documentation but I hope that the examples in `example.ipynb` and the test file can help you to understand how to load and use the module contained in `src` folder. Don't forget to change the working directory!
+Currently there is not available documentation but I hope that the examples in `example.ipynb` and the test file can help you to understand how to load and use the module contained in `src` folder. Don't forget to change the working directory in the test file!
