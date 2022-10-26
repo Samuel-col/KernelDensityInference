@@ -65,3 +65,32 @@ my_test = independencyTest(x,y)
 
 typeof(my_test)
 plot(my_test)
+
+# -------------------------- Regresión Kernel -----------------------
+
+x = rand(100)
+
+y = 1 ./(0.2 .+ x) .+ 0.4 .*randn(100)
+
+using Plots
+gr(minorgrid = true)
+scatter(x,y,
+    label = "Data",
+    title = "Random Data",
+    xlabel = "x",
+    ylabel = "y",
+    legend = :topright
+)
+
+kr = KernelRegression(x,y)
+
+KernelTests.eval(kr,0.3)
+
+kr.S*kr.y
+
+KernelTests.residuals(kr)
+
+sig2(kr)
+
+plot!(kr)
+
