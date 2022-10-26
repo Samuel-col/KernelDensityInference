@@ -1,4 +1,5 @@
 # Pruebas de hipótesis para inferenciaDensidadKernel
+using Base.Threads
 import QuadGK: quadgk
 
 abstract type AbstractHypothesysTest <: Any end
@@ -38,11 +39,12 @@ struct sameDistributionTest <: AbstractHypothesysTest
         ny = length(y)
         Tc = sameDistributionTest_statistic(x,y)
 
-        T_distribution = []
-        for i in 1:NIter
-            xi, yi = mix_samples(x,y)
-            Ti = sameDistributionTest_statistic(xi,yi)
-            push!(T_distribution,Ti)
+        T_distribution = zeros(NIter)
+        samps = (x,y)
+        @threads for i in 1:NIter
+            samps = mix_samples(samps...)
+            Ti = sameDistributionTest_statistic(samps...)
+            T_distribution[i] = Ti
         end
 
         pValue = mean(Tc .< T_distribution)
@@ -50,12 +52,13 @@ struct sameDistributionTest <: AbstractHypothesysTest
         if plt
             T_distribution = convert(Vector{Float64},T_distribution)
             kd_T = KernelDensity(T_distribution)
+            cota = max(Tc,maximum(T_distribution))
             plot = Plots.plot(kd_T,
                         title = "T-statistic distribution",
                         xlabel = "t",
                         ylabel = "Density",
                         legend = false,
-                        xlim = (0,max(Tc,maximum(T_distribution))*1.2)
+                        xlim = (-0.1*cota,cota*1.2)
                         )
             plot = Plots.vline!(plot,[Tc],linestyle = :dash)
         else

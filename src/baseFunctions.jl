@@ -26,12 +26,25 @@ function mix_samples(x::Vector{T},y::Vector{T})::Tuple{Vector{T},Vector{T}} wher
     ny = length(y)
     U = copy(x)
     U = append!(U,y)
-    new_x_ind = sample(1:(nx+ny),nx)
+    new_x_ind = sample(1:(nx+ny),nx,replace = false)
     new_x = U[new_x_ind]
-    new_y = symdiff(U,new_x)
+    new_y_ind = symdiff(1:(nx+ny),new_x_ind)
+    new_y = U[new_y_ind]
 
     return new_x,new_y
 end
+
+# function mix_samples!(samps::Vector{Vector{T}}) where T<:Real # ::Tuple{Vector{T},Vector{T}}
+#     N = length.(samps)
+#     nx, ny = N[1], N[2]
+#     U = append!(copy.(samps)...)
+#     new_x_ind = sample(1:(nx+ny),nx,replace = false)
+#     samps[1] = U[new_x_ind]
+#     new_y_ind = symdiff(1:(nx+ny),new_x_ind)
+#     samps[2] = U[new_y_ind]
+#     nothing
+#     #return new_x,new_y
+# end
 
 ## Reordenar muestra
 function shuffle_sample(x::Vector{T})::Vector{T} where T<:Real
