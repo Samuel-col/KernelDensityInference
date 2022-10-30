@@ -5,7 +5,7 @@ module KernelTests
     export density, discretize, plot, plot!
     export sameDistributionTest, independencyTest
     export KernelRegression, eval, residuals, sig2, pointVariance
-    export noEffectTest, display, noEffectGraphicTest
+    export noEffectTest, display, noEffectGraphicTest, linearEffectTest, linearEffectGraphicTest
 
     include("baseFunctions.jl")
 
