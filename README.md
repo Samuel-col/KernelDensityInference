@@ -50,7 +50,7 @@ where $SCE_0 = \sum_{i=1}^n(y_i - \bar{y})^2$, $gl_0=n-1$, $SCE_1 = \sum_{i=1}^n
 
 **Graphic alternative**: This test has a graphic version using confidence bands that is computationally faster when its performed over the `KernelRegression` object.
 
-![]()
+![](noEffectTest.png)
 
 ### linear effect test (`linearEffectTest`)
 
@@ -58,7 +58,7 @@ This test performs a simple linear regression and then applies the non effect te
 
 **Graphic alternative**: This test has a graphic version using confidence bands that is computationally faster when its performed over the `KernelRegression` object.
 
-![]()
+![](linearEffectTest.png)
 
 
 ## Future projects
