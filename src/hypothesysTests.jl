@@ -1,5 +1,5 @@
 # Pruebas de hipótesis para inferenciaDensidadKernel
-using Base.Threads
+#using Base.Threads
 import QuadGK: quadgk
 
 abstract type AbstractHypothesysTest <: Any end

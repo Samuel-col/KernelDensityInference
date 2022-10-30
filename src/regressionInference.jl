@@ -9,15 +9,16 @@ struct noEffectTest <: AbstractHypothesysTest
     plot::Union{Plots.Plot,Missing}
 
     function noEffectTest(x::Vector{T},y::Vector{T};
-                            NIter::Int = 500, plt::Bool = true) where T <: Real
+                            h::Union{T,Missing} = missing,NIter::Int = 500,
+                            plt::Bool = true) where T <: Real
         
-        kr = KernelRegression(x,y)
+        kr = KernelRegression(x,y,h = h)
         Tc = Fstat(kr)
 
         T_distribution = zeros(NIter)
         @threads for i = 1:NIter
             y_star = shuffle_sample(y)
-            kr_star = KernelRegression(x,y_star)
+            kr_star = KernelRegression(x,y_star,h = kr.h)
             T_distribution[i] = Fstat(kr_star)
         end
 
@@ -40,6 +41,10 @@ struct noEffectTest <: AbstractHypothesysTest
 
         new(length(x),Tc,pValue,NIter,plot)
     end
+end
+
+function noEffectTest(kr::KernelRegression;NIter::Int=500,plt::Bool = true)
+    return noEffectTest(kr.x,kr.y,h = kr.h,NIter = NIter, plt = plt)
 end
 
 ## Descripción de noEffectTest
@@ -72,8 +77,8 @@ function HoVar(kr::KernelRegression,x::Vector{T})::Vector{Float64} where T<:Real
     return [HoVar(kr,xi,σ2 = σ2) for xi in x]        
 end
 
-function noEffectGraphicTest(x::Vector{T},y::Vector{T}; alpha::Float64 = 0.05, nGrid::Int = 160,args...) where T<:Real
-    kr = KernelRegression(x,y)
+function noEffectGraphicTest(x::Vector{T},y::Vector{T}; h::Union{T,Missing} = missing,alpha::Float64 = 0.05, nGrid::Int = 160,args...) where T<:Real
+    kr = KernelRegression(x,y,h=h)
 
     a,b = minimum(kr.x), maximum(kr.x)
     rango = b-a
@@ -102,27 +107,14 @@ function noEffectGraphicTest(x::Vector{T},y::Vector{T}; alpha::Float64 = 0.05, n
     )
 
     return p
+end
 
+function noEffectGraphicTest(kr::KernelRegression;alpha::Float64 = 0.05, nGrid::Int = 160,args...)
+    return noEffectGraphicTest(kr.x,kr.y,h = kr.h, alpha = alpha, nGrid = nGrid; args...)
 end
 
 
 ## Linear effect test
-function linearRegression(x::Vector{T},y::Vector{T}) where T <: Real
-    
-    n = length(x)
-    if length(y) != n
-        stop("x and y length must be the same.")
-    end
-
-    X = hcat(ones(n),x)
-
-    β = inv(X'X)*(X'y)
-
-    ε = y .- X*β
-
-    return Dict("beta" => β, "residuals" => ε)
-end
-
 struct linearEffectTest <: AbstractHypothesysTest
     n::Int
     b0::Float64
@@ -133,18 +125,18 @@ struct linearEffectTest <: AbstractHypothesysTest
     plot::Union{Plots.Plot,Missing}
 
     function linearEffectTest(x::Vector{T},y::Vector{T};
-                            NIter::Int = 500, plt::Bool = true) where T <: Real
+                            h::Union{T,Missing} = missing,NIter::Int = 500, plt::Bool = true) where T <: Real
         
         lr = linearRegression(x,y)
         beta = get(lr,"beta",missing)
         y = get(lr,"residuals",missing)
-        kr = KernelRegression(x,y)
+        kr = KernelRegression(x,y,h = h)
         Tc = Fstat(kr)
 
         T_distribution = zeros(NIter)
         @threads for i = 1:NIter
             y_star = shuffle_sample(y)
-            kr_star = KernelRegression(x,y_star)
+            kr_star = KernelRegression(x,y_star,h = kr.h)
             T_distribution[i] = Fstat(kr_star)
         end
 
@@ -169,6 +161,9 @@ struct linearEffectTest <: AbstractHypothesysTest
     end
 end
 
+function linearEffectTest(kr::KernelRegression,NIter::Int = 500, plt::Bool = true)
+    linearEffectTest(kr.x,kr.y,h = kr.h, NIter = NIter, plt = plt)
+end
 
 ## Descripción de linearEffectTest
 function display(test::linearEffectTest)
@@ -190,12 +185,12 @@ end
 
 
 ## Linear effect Graphic test
-function linearEffectGraphicTest(x::Vector{T},y::Vector{T}; alpha::Float64 = 0.05, nGrid::Int = 160,args...) where T<:Real
+function linearEffectGraphicTest(x::Vector{T},y::Vector{T}; h::Union{T,Missing} = missing,alpha::Float64 = 0.05, nGrid::Int = 160,args...) where T<:Real
     lr = linearRegression(x,y)
     beta = get(lr,"beta",missing)
     res = get(lr,"residuals",missing)
-    kr = KernelRegression(x,y)
-    kr_res = KernelRegression(x,res)
+    kr = KernelRegression(x,y,h=h)
+    kr_res = KernelRegression(x,res,h = h)
 
     a,b = minimum(kr.x), maximum(kr.x)
     rango = b-a
@@ -225,6 +220,10 @@ function linearEffectGraphicTest(x::Vector{T},y::Vector{T}; alpha::Float64 = 0.0
 
     return p
 
+end
+
+function linearEffectGraphicTest(kr::KernelRegression, alpha::Float64 = 0.05, nGrid::Int = 160,args...)
+    linearEffectGraphicTest(kr.x,kr.y,h = kr.h, alpha = alpha, nGrid = nGrid; args...)
 end
 
 

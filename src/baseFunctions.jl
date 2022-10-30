@@ -1,5 +1,5 @@
 # Funciones base de inferenciaDensidadKernel
-using Statistics, StatsBase, LinearAlgebra
+using Statistics, StatsBase, LinearAlgebra, Base.Threads
 
 ## Densidad normal
 function gauss_pdf(x::T; mu::T = 0, sig::T = 1)::Float64 where T<:Real
@@ -53,4 +53,34 @@ function shuffle_sample(x::Vector{T})::Vector{T} where T<:Real
     #return x[new_ids]
     new_x = sample(x,n,replace = false)
     return new_x
+end
+
+## Hacer validación cruzada
+function crossValidation_kr(f::Union{Function,DataType},x::Vector{T},
+                            y::Vector{T};args...)::Vector{Any} where T <: Real
+    n = length(x)
+    indices = collect(1:n)
+    results = Vector{Any}(missing,n)
+    @threads for k in indices
+        new_indices = symdiff(indices,[k])
+        results[k] = f(x[new_indices],y[new_indices];args...)
+    end
+    return results
+end
+
+## Linear Regression
+function linearRegression(x::Vector{T},y::Vector{T}) where T <: Real
+    
+    n = length(x)
+    if length(y) != n
+        stop("x and y length must be the same.")
+    end
+
+    X = hcat(ones(n),x)
+
+    β = inv(X'X)*(X'y)
+
+    ε = y .- X*β
+
+    return Dict("beta" => β, "residuals" => ε)
 end

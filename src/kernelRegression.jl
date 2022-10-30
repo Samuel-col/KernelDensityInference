@@ -8,9 +8,35 @@ struct KernelRegression <: Any
     h::Float64
     n::Int
   
-    function KernelRegression(x::Vector{T},y::Vector{T}) where T<:Real
-        h = optimum_bandwidth(x)
+    function KernelRegression(x::Vector{T},y::Vector{T};
+                                h::Union{T,Missing} = missing) where T<:Real
+        if length(x) != length(y)
+            stop("x and y must have the same length.")
+        end
+
         n = length(x)
+
+        if ismissing(h)
+            println("Calculating optimum bandwidth using leave-one-out cross-validation...")
+            rango = -(minimum(x) - maximum(x))
+            #hs = range(1/500*rango,1/10*rango,length = 99)
+            hs = range(rango/100,rango/10,length = 23)
+            errors = zeros(23)
+
+            @threads for i in 1:23
+                results = crossValidation_kr(KernelRegression,x,y,h = hs[i])
+                expected = [eval(results[k],x[k]) for k in 1:n]
+                results = nothing
+                total_error = sum((y .- expected).^2)
+                errors[i] = total_error
+            end
+
+            h = hs[argmin(errors)]
+
+            println("Optimum bandwidth: $h")
+        end
+               
+        #h = optimum_bandwidth(x)
     
         S = [K(x[j] - x[i],h = h) for j = 1:n, i = 1:n]
         sTotalRow = sum(S,dims = 2)
@@ -74,6 +100,7 @@ function display(kr::KernelRegression)
     report = """
         Kernel Regresion
           ⋅ Sample size = $(kr.n)
+          ⋅ Bandwidth = $(kr.h)
           ⋅ Regression degrees of fredom = $(kr.n - kr.df - 1)
           ⋅ σ² = $(sig2(kr))
         """
