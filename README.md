@@ -42,7 +42,7 @@ where $f_{xy}(\cdot,\cdot)$ is the joint bivariate kernel density estimation for
 
 **Test statistic:**
 
-$$T_c = \frac{(SCE_0 - SCE_1)/(gl_0  gl_1)}{SCE_1/gl_1}$$
+$$T_c = \frac{(SCE_0 - SCE_1)/(gl_0 - gl_1)}{SCE_1/gl_1}$$
 
 where $SCE_0 = \sum_{i=1}^n(y_i - \bar{y})^2$, $gl_0=n-1$, $SCE_1 = \sum_{i=1}^n(y_i - \hat{m}(x_i))^2$ and $gl_1 = tr\left((\boldsymbol{I} - \boldsymbol{S})'(\boldsymbol{I} - \boldsymbol{S})\right)$. See (Bowman and Azzalini, 1997).
 
