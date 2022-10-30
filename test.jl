@@ -86,11 +86,28 @@ kr = KernelRegression(x,y)
 
 KernelTests.eval(kr,0.3)
 
-kr.S*kr.y
-
 KernelTests.residuals(kr)
 
-sig2(kr)
+plot!(kr,label = "Regression")
 
-plot!(kr)
+## ---------------------- Pruebas de Hipótesis ----------------
+## -- Test de no efecto
 
+my_test = noEffectTest(x,y)
+
+plot(my_test)
+
+my_test = noEffectTest(x,rand(100))
+
+plot(my_test)
+
+noEffectGraphicTest(x,y)
+
+## -- Test de efecto lineal
+
+my_test = linearEffectTest(x,y)
+
+plot(my_test)
+
+
+linearEffectGraphicTest(x,y)
