@@ -73,7 +73,7 @@ I'd like to implement the following tests:
 
 ## Tasks
 
-* Update `example.opynb`.
+* Update `example.ipynb`.
 * Replace leave-one-out cross-validation by generalized cross-validation.
 * Implement ANCOVA.
 * Add confidence bands to univariate kernel density plot.
