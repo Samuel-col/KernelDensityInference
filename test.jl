@@ -82,7 +82,11 @@ scatter(x,y,
     legend = :topright
 )
 
+plot!(x -> 1/(0.2 + x),0,1,label = "Real Data")
+
+kr = KernelRegression(x,y,h = 0.07)
 kr = KernelRegression(x,y)
+
 
 KernelTests.eval(kr,0.3)
 
@@ -93,21 +97,23 @@ plot!(kr,label = "Regression")
 ## ---------------------- Pruebas de Hipótesis ----------------
 ## -- Test de no efecto
 
+noEffectTest(kr)
 my_test = noEffectTest(x,y)
 
 plot(my_test)
 
-my_test = noEffectTest(x,rand(100))
-
-plot(my_test)
-
+noEffectGraphicTest(kr)
+savefig("noEffectTest.png")
 noEffectGraphicTest(x,y)
 
 ## -- Test de efecto lineal
 
+linearEffectTest(kr)
 my_test = linearEffectTest(x,y)
 
 plot(my_test)
 
 
+linearEffectGraphicTest(kr)
+savefig("linearEffectTest.png")
 linearEffectGraphicTest(x,y)
